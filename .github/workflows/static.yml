@@ -1,0 +1,758 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Academic AI Helper (INSECURE - API Key Exposed)</title>
+    <style>
+        /* --- CSS Styles (Same as before) --- */
+        :root {
+            --primary-color: #4CAF50; /* Green */
+            --primary-dark: #388E3C;
+            --secondary-color: #2196F3; /* Blue */
+            --secondary-dark: #1976D2;
+            --accent-color: #FFC107; /* Amber */
+            --text-color: #333;
+            --light-bg: #f9f9f9;
+            --border-color: #ddd;
+            --card-bg: #fff;
+            --shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #e0f2f7 0%, #c8e6c9 100%); /* Light, fresh gradient */
+            min-height: 100vh;
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+            align-items: flex-start; /* Align to top */
+            color: var(--text-color);
+        }
+
+        .container {
+            background: var(--card-bg);
+            border-radius: 15px;
+            box-shadow: var(--shadow);
+            padding: 30px;
+            max-width: 800px;
+            width: 100%;
+            margin-top: 20px; /* Space from top */
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 30px;
+            padding-bottom: 20px;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        header h1 {
+            font-size: 2.5em;
+            color: var(--primary-dark);
+            margin-bottom: 10px;
+        }
+
+        header p {
+            font-size: 1em;
+            color: #666;
+        }
+
+        .input-section, .output-section {
+            padding: 20px;
+            background-color: var(--light-bg);
+            border-radius: 10px;
+            margin-bottom: 25px;
+            box-shadow: inset 0 0 8px rgba(0, 0, 0, 0.05);
+        }
+
+        /* Subject Select */
+        .subject-select {
+            margin-bottom: 20px;
+        }
+
+        .subject-select label {
+            display: block;
+            font-weight: bold;
+            margin-bottom: 8px;
+            color: #555;
+        }
+
+        #subjectSelect {
+            width: 100%;
+            padding: 10px 15px;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            font-size: 1em;
+            background-color: var(--card-bg);
+            appearance: none; /* Remove default arrow */
+            background-image: url("data:image/svg+xml;charset=UTF8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath fill='%23666' d='M7 10l5 5 5-5z'/%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: right 10px center;
+            background-size: 20px;
+            cursor: pointer;
+        }
+
+        #subjectSelect:focus {
+            outline: none;
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 3px rgba(76, 175, 80, 0.2);
+        }
+
+        /* Question Input Area */
+        .question-input {
+            margin-bottom: 20px;
+        }
+
+        #questionText {
+            width: 100%;
+            min-height: 120px;
+            padding: 15px;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            font-size: 1.05em;
+            resize: vertical;
+            transition: border-color 0.3s ease, box-shadow 0.3s ease;
+            font-family: inherit;
+            line-height: 1.5;
+        }
+
+        #questionText:focus {
+            outline: none;
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 3px rgba(76, 175, 80, 0.2);
+        }
+
+        /* Image Upload Area */
+        .image-upload-area {
+            margin-top: 15px;
+            border: 2px dashed #b0bec5; /* Light grey dashed border */
+            border-radius: 10px;
+            padding: 15px;
+            text-align: center;
+            background-color: #eceff1; /* Very light grey */
+            transition: all 0.3s ease;
+        }
+
+        .image-upload-area.drag-over {
+            border-color: var(--secondary-color);
+            background-color: #e3f2fd; /* Light blue on drag-over */
+        }
+
+        .upload-btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            padding: 10px 20px;
+            background-color: var(--secondary-color);
+            color: white;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 0.95em;
+            font-weight: bold;
+            transition: background-color 0.3s ease, transform 0.2s ease;
+        }
+
+        .upload-btn:hover {
+            background-color: var(--secondary-dark);
+            transform: translateY(-2px);
+        }
+
+        .upload-btn .icon {
+            font-size: 1.2em;
+            margin-right: 8px;
+        }
+
+        .image-preview {
+            margin-top: 15px;
+            padding: 10px;
+            background-color: var(--card-bg);
+            border-radius: 8px;
+            border: 1px solid var(--border-color);
+            min-height: 40px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 0.9em;
+            color: #666;
+            overflow: hidden;
+        }
+
+        .image-preview img {
+            max-width: 100%;
+            max-height: 200px; /* Max height for preview image */
+            border-radius: 5px;
+            object-fit: contain;
+        }
+
+        /* Action Buttons */
+        .action-buttons {
+            display: flex;
+            gap: 15px;
+            justify-content: flex-end; /* Align buttons to the right */
+            margin-top: 20px;
+        }
+
+        .primary-btn, .secondary-btn {
+            padding: 12px 25px;
+            border: none;
+            border-radius: 8px;
+            font-size: 1.1em;
+            font-weight: bold;
+            cursor: pointer;
+            transition: background-color 0.3s ease, transform 0.2s ease;
+        }
+
+        .primary-btn:hover {
+            background-color: var(--primary-dark);
+            transform: translateY(-2px);
+        }
+
+        .primary-btn:disabled {
+            background-color: #ccc;
+            cursor: not-allowed;
+            transform: none;
+            opacity: 0.7;
+        }
+
+        .secondary-btn {
+            background-color: #6c757d; /* Grey */
+            color: white;
+        }
+
+        .secondary-btn:hover {
+            background-color: #5a6268;
+            transform: translateY(-2px);
+        }
+
+        /* Output Section */
+        .loading-indicator {
+            display: none; /* Hidden by default */
+            text-align: center;
+            padding: 20px;
+            color: var(--primary-dark);
+            font-weight: bold;
+        }
+
+        .loading-indicator.active {
+            display: block;
+        }
+
+        .spinner {
+            border: 4px solid rgba(0, 0, 0, 0.1);
+            border-top: 4px solid var(--primary-color);
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 10px auto;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .answer-box {
+            background-color: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 10px;
+            padding: 20px;
+            min-height: 120px;
+            white-space: pre-wrap; /* Preserve formatting from AI */
+            font-size: 1.05em;
+            line-height: 1.6;
+            color: #444;
+        }
+
+        .answer-box p {
+            margin: 0;
+        }
+
+        .status-message {
+            margin-top: 15px;
+            padding: 10px 15px;
+            border-radius: 8px;
+            font-size: 0.9em;
+            font-weight: bold;
+            display: none; /* Hidden by default */
+        }
+
+        .status-message.success {
+            background-color: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+            display: block;
+        }
+
+        .status-message.error {
+            background-color: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+            display: block;
+        }
+
+        .answer-actions {
+            margin-top: 15px;
+            display: flex;
+            gap: 10px;
+            justify-content: flex-end; /* Align buttons to the right */
+        }
+
+        .action-btn {
+            padding: 8px 15px;
+            background-color: var(--secondary-color);
+            color: white;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 0.9em;
+            transition: background-color 0.3s ease;
+        }
+
+        .action-btn:hover {
+            background-color: var(--secondary-dark);
+        }
+
+        /* New: Speech Language Select */
+        .speech-controls {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-top: 10px;
+            justify-content: flex-end;
+        }
+
+        .speech-controls label {
+            font-size: 0.9em;
+            color: #555;
+            font-weight: bold;
+        }
+
+        #speechLangSelect {
+            padding: 8px 12px;
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            font-size: 0.9em;
+            background-color: var(--card-bg);
+            cursor: pointer;
+            appearance: none;
+            background-image: url("data:image/svg+xml;charset=UTF8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath fill='%23666' d='M7 10l5 5 5-5z'/%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: right 8px center;
+            background-size: 18px;
+        }
+
+        #speechLangSelect:focus {
+            outline: none;
+            border-color: var(--secondary-color);
+            box-shadow: 0 0 0 3px rgba(33, 150, 243, 0.2);
+        }
+
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>📚 Academic AI Helper</h1>
+            <p>Your instant solution for questions in Math, Science, Languages & more!</p>
+        </header>
+
+        <main>
+            <section class="input-section">
+                <div class="subject-select">
+                    <label for="subjectSelect">Select Subject:</label>
+                    <select id="subjectSelect">
+                        <option value="general">General</option>
+                        <option value="math">Math</option>
+                        <option value="physics">Physics</option>
+                        <option value="chemistry">Chemistry</option>
+                        <option value="biology">Biology</option>
+                        <option value="english">English</option>
+                        <option value="hindi">Hindi</option>
+                        <option value="computer">Computer Science</option>
+                    </select>
+                </div>
+
+                <div class="question-input">
+                    <textarea id="questionText" placeholder="Type your question here..."></textarea>
+                    <div class="image-upload-area" id="imageUploadArea">
+                        <input type="file" id="imageInput" accept="image/*" hidden>
+                        <label for="imageInput" class="upload-btn">
+                            <span class="icon">📸</span> Upload Image
+                        </label>
+                        <div class="image-preview" id="imagePreview">No image selected.</div>
+                    </div>
+                </div>
+                
+                <div class="action-buttons">
+                    <button id="solveBtn" class="primary-btn">Solve Question</button>
+                    <button id="clearBtn" class="secondary-btn">Clear</button>
+                </div>
+            </section>
+
+            <section class="output-section">
+                <div id="loading" class="loading-indicator">
+                    <div class="spinner"></div>
+                    <p>AI is thinking...</p>
+                </div>
+                <div id="answerArea" class="answer-box">
+                    <p>Your solution will appear here.</p>
+                </div>
+                <div id="statusMessage" class="status-message"></div>
+                <div class="answer-actions">
+                    <button id="copyBtn" class="action-btn">Copy</button>
+                    <div class="speech-controls">
+                        <label for="speechLangSelect">Speak in:</label>
+                        <select id="speechLangSelect">
+                            <option value="en-US">English</option>
+                            <option value="hi-IN">Hindi</option>
+                            <option value="hinglish">Hinglish</option>
+                        </select>
+                        <button id="speakBtn" class="action-btn">Speak</button>
+                    </div>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <script>
+        /* --- JavaScript Logic (INSECURE: API Key directly in code) --- */
+
+        // !!! WARNING !!!
+        // This is extremely INSECURE for your API key.
+        // DO NOT USE THIS IN A PRODUCTION ENVIRONMENT OR FOR SENSITIVE APPLICATIONS.
+        // YOUR API KEY WILL BE VISIBLE TO ANYONE WHO VIEWS YOUR PAGE SOURCE.
+        const UNSAFE_API_KEY = "AIzaSyCgWNYFElaqpK4UbMbN70pm0myXS5-HdA8";
+        const GEMINI_API_URL = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${UNSAFE_API_KEY}`;
+        // !!! WARNING !!!
+
+        document.addEventListener('DOMContentLoaded', () => {
+            const subjectSelect = document.getElementById('subjectSelect');
+            const questionText = document.getElementById('questionText');
+            const imageInput = document.getElementById('imageInput');
+            const imageUploadArea = document.getElementById('imageUploadArea');
+            const imagePreview = document.getElementById('imagePreview');
+            const solveBtn = document.getElementById('solveBtn');
+            const clearBtn = document.getElementById('clearBtn');
+            const loadingIndicator = document.getElementById('loading');
+            const answerArea = document.getElementById('answerArea');
+            const statusMessage = document.getElementById('statusMessage');
+            const copyBtn = document.getElementById('copyBtn');
+            const speakBtn = document.getElementById('speakBtn');
+            const speechLangSelect = document.getElementById('speechLangSelect'); // New
+
+            let uploadedImageBase64 = null; // To store the base64 string of the image
+            let availableVoices = []; // To store browser's speech synthesis voices
+
+            // Load voices once they are available
+            if ('speechSynthesis' in window) {
+                window.speechSynthesis.onvoiceschanged = () => {
+                    availableVoices = window.speechSynthesis.getVoices();
+                };
+            }
+
+            // --- UI Utility Functions ---
+            function showLoading(show) {
+                if (show) {
+                    loadingIndicator.classList.add('active');
+                    solveBtn.disabled = true;
+                    answerArea.innerHTML = '<p>AI is thinking...</p>'; // Clear previous answer and show placeholder
+                    statusMessage.style.display = 'none'; // Hide any previous status messages
+                } else {
+                    loadingIndicator.classList.remove('active');
+                    solveBtn.disabled = false;
+                }
+            }
+
+            function showStatus(message, type = 'info') {
+                statusMessage.textContent = message;
+                statusMessage.className = `status-message ${type}`;
+                statusMessage.style.display = 'block';
+                // Auto-hide after 5 seconds
+                setTimeout(() => {
+                    statusMessage.style.display = 'none';
+                }, 5000);
+            }
+
+            function clearAll() {
+                questionText.value = '';
+                imageInput.value = ''; // Clear file input
+                uploadedImageBase64 = null;
+                imagePreview.innerHTML = 'No image selected.';
+                imagePreview.style.backgroundImage = 'none'; // Clear background image
+                imageUploadArea.classList.remove('drag-over'); // Remove drag-over class
+                answerArea.innerHTML = '<p>Your solution will appear here.</p>';
+                statusMessage.style.display = 'none';
+                showLoading(false); // Ensure loading is off and button is enabled
+                if ('speechSynthesis' in window) {
+                    window.speechSynthesis.cancel(); // Stop any ongoing speech
+                }
+            }
+
+            // --- Subject-specific prompts (Client-side) ---
+            function getSubjectPrompt(subject) {
+                const prompts = {
+                    'general': "You are a helpful academic assistant. Provide clear, detailed explanations for any academic question. Use step-by-step solutions when applicable.",
+                    'math': "You are a mathematics expert. Solve problems step-by-step with clear explanations. Show all work, formulas used, and provide final answers. Include diagrams when helpful.",
+                    'physics': "You are a physics expert. Explain concepts clearly and solve problems with detailed steps. Include formulas, units, and diagrams when necessary. Make complex topics easy to understand.",
+                    'chemistry': "You are a chemistry expert. Explain chemical concepts, reactions, and solve chemistry problems with detailed steps. Include chemical equations, molecular structures, and calculations when needed.",
+                    'biology': "You are a biology expert. Explain biological concepts, processes, and systems clearly. Include diagrams, examples, and step-by-step explanations for complex processes.",
+                    'english': "You are an expert English teacher. Help with grammar, literature, writing, vocabulary, and language skills. Provide clear explanations with examples.",
+                    'hindi': "आप एक हिंदी विषय के विशेषज्ञ शिक्षक हैं। हिंदी व्याकरण, साहित्य, कविता, और भाषा संबंधी सभी प्रश्नों का उत्तर हिंदी में दें। उदाहरण सहित समझाएं।",
+                    'computer': "You are a computer science expert. Help with programming, algorithms, data structures, and computer concepts. Provide code examples, explanations, and best practices."
+                };
+                return prompts[subject] || prompts['general'];
+            }
+
+            // --- Image Upload Logic ---
+            imageInput.addEventListener('change', function(event) {
+                const file = event.target.files[0];
+                if (file) {
+                    if (file.size > 5 * 1024 * 1024) { // Max 5MB
+                        showStatus('Image size should be less than 5MB.', 'error');
+                        imageInput.value = ''; // Clear the input
+                        imagePreview.innerHTML = 'No image selected.';
+                        uploadedImageBase64 = null;
+                        return;
+                    }
+                    const reader = new FileReader();
+                    reader.onload = function(e) {
+                        uploadedImageBase64 = e.target.result; // Store base64
+                        imagePreview.innerHTML = `<img src="${e.target.result}" alt="Uploaded Image">`;
+                    };
+                    reader.readAsDataURL(file);
+                } else {
+                    imagePreview.innerHTML = 'No image selected.';
+                    uploadedImageBase64 = null;
+                }
+            });
+
+            // Drag and drop functionality
+            imageUploadArea.addEventListener('dragover', (e) => {
+                e.preventDefault();
+                imageUploadArea.classList.add('drag-over');
+            });
+
+            imageUploadArea.addEventListener('dragleave', () => {
+                imageUploadArea.classList.remove('drag-over');
+            });
+
+            imageUploadArea.addEventListener('drop', (e) => {
+                e.preventDefault();
+                imageUploadArea.classList.remove('drag-over');
+                const files = e.dataTransfer.files;
+                if (files.length > 0) {
+                    imageInput.files = files; // Assign files to the input
+                    imageInput.dispatchEvent(new Event('change')); // Trigger change event
+                }
+            });
+
+            // --- Solve Question Logic (Direct API Call - UNSAFE) ---
+            solveBtn.addEventListener('click', async () => {
+                const question = questionText.value.trim();
+                const subject = subjectSelect.value;
+
+                if (!question && !uploadedImageBase64) {
+                    showStatus('Please enter a question or upload an image.', 'error');
+                    return;
+                }
+
+                showLoading(true);
+                answerArea.innerHTML = ''; // Clear previous answer
+
+                try {
+                    const contents = [];
+                    // Add the subject prompt
+                    contents.push({ text: getSubjectPrompt(subject) });
+
+                    // Add the text question part
+                    if (question) {
+                        contents.push({ text: `\n\nQuestion: ${question}` });
+                    } else {
+                        contents.push({ text: "\n\nAnalyze the image and provide a detailed solution." });
+                    }
+
+                    // Add the image part if provided
+                    if (uploadedImageBase64) {
+                        const [header, data] = uploadedImageBase64.split(',');
+                        const mimeType = header.split(';')[0].split(':')[1];
+                        
+                        contents.push({
+                            inlineData: {
+                                mimeType: mimeType,
+                                data: data // Just the base64 string
+                            }
+                        });
+                    }
+
+                    const requestBody = {
+                        contents: [{ parts: contents }],
+                        generationConfig: {
+                            temperature: 0.7, // Adjust as needed
+                            maxOutputTokens: 800, // Adjust as needed
+                        }
+                    };
+                    
+                    // Direct API call to Google Gemini (UNSAFE due to API key exposure)
+                    const response = await fetch(GEMINI_API_URL, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify(requestBody),
+                    });
+
+                    const result = await response.json();
+                    
+                    // Check for errors (e.g., safety, invalid key)
+                    if (!response.ok || result.error) {
+                        let errorMessage = 'An API error occurred.';
+                        if (result.error && result.error.message) {
+                            errorMessage = result.error.message;
+                        } else if (result.candidates && result.candidates[0] && result.candidates[0].finishReason === 'SAFETY') {
+                            errorMessage = 'Your request was blocked due to safety concerns. Please rephrase.';
+                        }
+                        answerArea.innerHTML = `<p>Error: ${errorMessage}</p>`;
+                        showStatus(errorMessage, 'error');
+                    } else if (result.candidates && result.candidates[0] && result.candidates[0].content && result.candidates[0].content.parts && result.candidates[0].content.parts[0]) {
+                        answerArea.innerHTML = `<p>${result.candidates[0].content.parts[0].text}</p>`;
+                        showStatus('Question solved successfully!', 'success');
+                    } else {
+                        answerArea.innerHTML = `<p>No solution found or unexpected response format.</p>`;
+                        showStatus('Failed to get a clear solution.', 'error');
+                    }
+                } catch (error) {
+                    console.error('Error fetching solution:', error);
+                    answerArea.innerHTML = `<p>Could not connect to the API. Please check your network or API key.</p>`;
+                    showStatus('Network or API error. Please try again later.', 'error');
+                } finally {
+                    showLoading(false);
+                }
+            });
+
+            // --- Other Action Buttons ---
+            clearBtn.addEventListener('click', clearAll);
+
+            copyBtn.addEventListener('click', () => {
+                const textToCopy = answerArea.textContent;
+                navigator.clipboard.writeText(textToCopy).then(() => {
+                    showStatus('Answer copied to clipboard!', 'success');
+                }).catch(err => {
+                    console.error('Failed to copy text: ', err);
+                    showStatus('Failed to copy answer.', 'error');
+                });
+            });
+
+            // --- Speak Functionality ---
+            speakBtn.addEventListener('click', () => {
+                const textToSpeak = answerArea.textContent;
+                const selectedLang = speechLangSelect.value;
+
+                if (!textToSpeak || textToSpeak.includes('Your solution will appear here.')) {
+                    showStatus('No answer to speak.', 'info');
+                    return;
+                }
+
+                if (!('speechSynthesis' in window)) {
+                    showStatus('Speech synthesis is not supported in this browser.', 'error');
+                    return;
+                }
+
+                window.speechSynthesis.cancel(); // Stop any ongoing speech
+
+                const utterance = new SpeechSynthesisUtterance(textToSpeak);
+                utterance.rate = 0.9; // Slightly slower speed
+                utterance.pitch = 1;
+
+                let voiceFound = false;
+
+                // Function to find and set voice
+                const setVoice = () => {
+                    if (selectedLang === 'hinglish') {
+                        // For Hinglish, try to find a voice that sounds good for both
+                        // Prioritize English (India) or English (US) for better pronunciation of English words
+                        // Fallback to Hindi if no suitable English voice for Indian context
+                        let preferredVoice = availableVoices.find(voice => 
+                            (voice.lang === 'en-IN' && voice.name.includes('Google')) || 
+                            (voice.lang === 'en-US' && voice.name.includes('Google'))
+                        );
+                        if (!preferredVoice) {
+                            preferredVoice = availableVoices.find(voice => voice.lang.startsWith('en'));
+                        }
+                        if (!preferredVoice) { // If no English voice, try Hindi
+                            preferredVoice = availableVoices.find(voice => voice.lang === 'hi-IN' && voice.name.includes('Google'));
+                        }
+                        if (!preferredVoice) { // Fallback to any Hindi voice
+                            preferredVoice = availableVoices.find(voice => voice.lang.startsWith('hi'));
+                        }
+                        
+                        if (preferredVoice) {
+                            utterance.voice = preferredVoice;
+                            utterance.lang = preferredVoice.lang; // Set lang based on the chosen voice
+                            voiceFound = true;
+                        }
+
+                    } else if (selectedLang === 'hi-IN') {
+                        // For Hindi, try specific Hindi voices first
+                        let preferredVoice = availableVoices.find(voice => 
+                            voice.lang === 'hi-IN' && voice.name.includes('Google')
+                        );
+                        if (!preferredVoice) {
+                            preferredVoice = availableVoices.find(voice => voice.lang.startsWith('hi'));
+                        }
+                        if (preferredVoice) {
+                            utterance.voice = preferredVoice;
+                            utterance.lang = 'hi-IN'; // Explicitly set lang
+                            voiceFound = true;
+                        } else {
+                            // Fallback if no Hindi voice is found
+                            utterance.lang = 'hi-IN'; // Still try to set lang, browser might default
+                        }
+                    } else { // Default to English (en-US)
+                        let preferredVoice = availableVoices.find(voice => 
+                            voice.lang === 'en-US' && voice.name.includes('Google')
+                        );
+                        if (!preferredVoice) {
+                            preferredVoice = availableVoices.find(voice => voice.lang.startsWith('en'));
+                        }
+                        if (preferredVoice) {
+                            utterance.voice = preferredVoice;
+                            utterance.lang = 'en-US'; // Explicitly set lang
+                            voiceFound = true;
+                        } else {
+                            // Fallback if no English voice is found
+                            utterance.lang = 'en-US'; // Still try to set lang
+                        }
+                    }
+
+                    window.speechSynthesis.speak(utterance);
+                    showStatus(`Speaking in ${selectedLang === 'en-US' ? 'English' : (selectedLang === 'hi-IN' ? 'Hindi' : 'Hinglish')}...`, 'info');
+
+                    if (!voiceFound) {
+                        console.warn(`No specific voice found for ${selectedLang}. Browser will use default.`);
+                        showStatus(`Speaking. No ideal voice found for ${selectedLang}.`, 'info');
+                    }
+                };
+
+                // If voices are already loaded, call setVoice immediately.
+                // Otherwise, it will be called by onvoiceschanged event.
+                if (availableVoices.length > 0) {
+                    setVoice();
+                } else {
+                    // Fallback if voices are still loading or not available
+                    utterance.lang = selectedLang === 'hinglish' ? 'en-US' : selectedLang; // Default lang
+                    window.speechSynthesis.speak(utterance);
+                    showStatus(`Speaking. Voices are still loading or unavailable.`, 'info');
+                }
+            });
+        });
+    </script>
+</body>
+</html>
